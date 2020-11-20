@@ -1,0 +1,168 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "BBCE External Broker APIa",
+    "version": "1.0.0",
+    "title": "BBCE External Broker API",
+    "termsOfService": "http://todo.to.do"
+  },
+  "basePath": "/broker",
+  "tags": [
+    {
+      "name": "Broker",
+      "description": "Broker events management routes"
+    }
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "parameters": {
+    "productId": {
+      "name": "productId",
+      "description": "Product identifier",
+      "required": true,
+      "in": "query",
+      "type": "integer"
+    }
+  },
+  "paths": {
+    "/v1/events": {
+      "get": {
+        "tags": [
+          "Broker"
+        ],
+        "summary": "Returns list of events",
+        "operationId": "getEvents",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/productId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of events",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Event"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Event": {
+      "type": "object",
+      "properties": {
+        "openingPrice": {
+          "type": "number",
+          "example": 160
+        },
+        "maximumPrice": {
+          "type": "number",
+          "example": 180
+        },
+        "minimumPrice": {
+          "type": "number",
+          "example": 130
+        },
+        "lastOfferPrice": {
+          "type": "number",
+          "example": 145
+        },
+        "lastOfferTime": {
+          "type": "number",
+          "example": 1603887115970
+        },
+        "fixedPrice": {
+          "type": "boolean",
+          "example": false
+        },
+        "purchaseOrders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PurchaseOrder"
+          }
+        },
+        "saleOrders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SaleOrder"
+          }
+        }
+      }
+    },
+    "PurchaseOrder": {
+      "type": "object",
+      "properties": {
+        "quantity": {
+          "type": "number",
+          "format": "float",
+          "example": 10
+        },
+        "price": {
+          "type": "number",
+          "example": 170
+        }
+      }
+    },
+    "SaleOrder": {
+      "type": "object",
+      "properties": {
+        "quantity": {
+          "type": "number",
+          "format": "float",
+          "example": 10
+        },
+        "price": {
+          "type": "number",
+          "example": 170
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Description message of the given error",
+          "example": "Unexpected error"
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "TODO Find out more about Swagger",
+    "url": "http://todo.io"
+  }
+}

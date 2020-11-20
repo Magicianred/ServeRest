@@ -49,6 +49,11 @@ if (formaDeExecucao() === 'serverest.dev' || formaDeExecucao() === 'agilizei') {
 
 logger(app)
 
+const swaggerUi = require('swagger-ui-express')
+const swaggerDocument = require('../docs/swagger.json')
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+
 /* istanbul ignore next */
 app.get('/', async (req, res) => {
   let pathDocumentacao
