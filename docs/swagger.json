@@ -1,168 +1,283 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "BBCE External Broker APIa",
+    "description": "O ServeRest é um servidor REST que simula uma loja virtual com intuito de servir de material de estudos de testes de API",
     "version": "1.0.0",
-    "title": "BBCE External Broker API",
-    "termsOfService": "http://todo.to.do"
+    "title": "ServeRest"
   },
-  "basePath": "/broker",
   "tags": [
     {
-      "name": "Broker",
-      "description": "Broker events management routes"
+      "name": "Usuários",
+      "description": "Gerencie os usuários, consulte dados para login e cadastre administrador"
     }
   ],
   "schemes": [
     "http",
     "https"
   ],
-  "parameters": {
-    "productId": {
-      "name": "productId",
-      "description": "Product identifier",
-      "required": true,
-      "in": "query",
-      "type": "integer"
-    }
-  },
   "paths": {
-    "/v1/events": {
+    "/usuarios": {
       "get": {
         "tags": [
-          "Broker"
+          "Usuários"
         ],
-        "summary": "Returns list of events",
+        "summary": "Listar usuários cadastrados",
         "operationId": "getEvents",
         "produces": [
           "application/json"
         ],
         "parameters": [
           {
-            "$ref": "#/parameters/productId"
+            "$ref": "#/parameters/_id"
+          },
+          {
+            "$ref": "#/parameters/nome"
+          },
+          {
+            "$ref": "#/parameters/email"
+          },
+          {
+            "$ref": "#/parameters/password"
+          },
+          {
+            "$ref": "#/parameters/administrador"
           }
         ],
         "responses": {
           "200": {
-            "description": "List of events",
+            "description": "Lista de usuários",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Event"
-              }
+              "$ref": "#/definitions/getUsuarios"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Usuários"
+        ],
+        "summary": "Cadastrar usuário",
+        "description": "Não é permitido cadastrar usuário com email já utilizado",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "user",
+            "schema": {
+              "$ref": "#/definitions/requestBodyUsuarios"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Cadastro com sucesso",
+            "schema": {
+              "$ref": "#/definitions/cadastroComSucesso"
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "E-mail já cadastrado",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/errorEmailJaUtilizado"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Usuários"
+        ],
+        "summary": "Editar usuário",
+        "description": "Não é permitido cadastrar usuário com email já utilizado. Caso não seja encontrado usuário com o ID informado é realizado novo cadastro ao invés de alteração.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "description": "ID do usuário a ser alterado",
+            "type": "string",
+            "default": "0uxuPY0cbmQhpEz1"
+          },
+          {
+            "in": "body",
+            "name": "user",
+            "schema": {
+              "$ref": "#/definitions/requestBodyUsuarios"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Alterado com sucesso",
+            "schema": {
+              "$ref": "#/definitions/alteradoComSucesso"
             }
           },
-          "401": {
-            "description": "Not Authorized"
-          },
-          "403": {
-            "description": "Forbidden",
+          "201": {
+            "description": "Cadastro com sucesso",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/cadastroComSucesso"
             }
           },
-          "500": {
-            "description": "Internal Server Error",
+          "400": {
+            "description": "E-mail já cadastrado",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/errorEmailJaUtilizado"
             }
           }
         }
       }
     }
   },
+  "parameters": {
+    "_id": {
+      "in": "query",
+      "name": "_id",
+      "required": false,
+      "type": "string"
+    },
+    "nome": {
+      "in": "query",
+      "name": "nome",
+      "required": false,
+      "type": "string"
+    },
+    "email": {
+      "in": "query",
+      "name": "email",
+      "required": false,
+      "type": "string"
+    },
+    "password": {
+      "in": "query",
+      "name": "password",
+      "required": false,
+      "type": "string"
+    },
+    "administrador": {
+      "in": "query",
+      "name": "administrador",
+      "required": false,
+      "type": "string",
+      "enum": [
+        "true",
+        "false"
+      ]
+    }
+  },
   "definitions": {
-    "Event": {
-      "type": "object",
-      "properties": {
-        "openingPrice": {
-          "type": "number",
-          "example": 160
-        },
-        "maximumPrice": {
-          "type": "number",
-          "example": 180
-        },
-        "minimumPrice": {
-          "type": "number",
-          "example": 130
-        },
-        "lastOfferPrice": {
-          "type": "number",
-          "example": 145
-        },
-        "lastOfferTime": {
-          "type": "number",
-          "example": 1603887115970
-        },
-        "fixedPrice": {
-          "type": "boolean",
-          "example": false
-        },
-        "purchaseOrders": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/PurchaseOrder"
-          }
-        },
-        "saleOrders": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/SaleOrder"
-          }
-        }
-      }
+    "nome": {
+      "type": "string",
+      "example": "Fulano da Silva"
     },
-    "PurchaseOrder": {
-      "type": "object",
-      "properties": {
-        "quantity": {
-          "type": "number",
-          "format": "float",
-          "example": 10
-        },
-        "price": {
-          "type": "number",
-          "example": 170
-        }
-      }
+    "email": {
+      "type": "string",
+      "example": "beltrano@qa.com.br"
     },
-    "SaleOrder": {
-      "type": "object",
-      "properties": {
-        "quantity": {
-          "type": "number",
-          "format": "float",
-          "example": 10
-        },
-        "price": {
-          "type": "number",
-          "example": 170
-        }
-      }
+    "password": {
+      "type": "string",
+      "example": "teste"
     },
-    "Error": {
-      "type": "object",
-      "required": [
-        "message"
+    "administrador": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false"
       ],
+      "example": "true"
+    },
+    "_id": {
+      "type": "string",
+      "example": "0uxuPY0cbmQhpEz1"
+    },
+    "requestBodyUsuarios": {
+      "type": "object",
+      "properties": {
+        "nome": {
+          "$ref": "#/definitions/nome"
+        },
+        "email": {
+          "$ref": "#/definitions/email"
+        },
+        "password": {
+          "$ref": "#/definitions/password"
+        },
+        "administrador": {
+          "$ref": "#/definitions/administrador"
+        }
+      }
+    },
+    "getUsuarios": {
+      "type": "object",
+      "properties": {
+        "quantidade": {
+          "type": "number",
+          "example": 1
+        },
+        "usuarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "nome": {
+                "$ref": "#/definitions/nome"
+              },
+              "email": {
+                "$ref": "#/definitions/email"
+              },
+              "password": {
+                "$ref": "#/definitions/password"
+              },
+              "administrador": {
+                "$ref": "#/definitions/administrador"
+              },
+              "_id": {
+                "$ref": "#/definitions/_id"
+              }
+            }
+          }
+        }
+      }
+    },
+    "cadastroComSucesso": {
+      "type": "object",
       "properties": {
         "message": {
           "type": "string",
-          "description": "Description message of the given error",
-          "example": "Unexpected error"
+          "example": "Cadastro realizado com sucesso"
+        },
+        "_id": {
+          "type": "string",
+          "example": "jogfODIlXsqxNFS2"
+        }
+      }
+    },
+    "alteradoComSucesso": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "Registro alterado com sucesso"
+        }
+      }
+    },
+    "errorEmailJaUtilizado": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "Este email já está sendo usado"
         }
       }
     }
   },
   "externalDocs": {
-    "description": "TODO Find out more about Swagger",
-    "url": "http://todo.io"
+    "description": "Repositório do ServeRest",
+    "url": "https://github.com/PauloGoncalvesBH/ServeRest"
   }
 }
