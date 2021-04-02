@@ -27,6 +27,13 @@
     "http",
     "https"
   ],
+  "securityDefinitions": {
+    "ApiKeyAuth": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
   "paths": {
     "/usuarios": {
       "get": {
@@ -219,13 +226,13 @@
           "Login"
         ],
         "summary": "Realizar login",
-        "description": "A duração padrão do token retornado em authorization é de 600 segundos (10 minutos). Caso esteja expirado irá receber status code 401 (Unauthorized).",
+        "description": "A duração do token retornado em authorization é de 600 segundos (10 minutos). Caso esteja expirado irá receber status code 401 (Unauthorized). Caso esteja utilizando o _ServeRest_ via docker ou NPM execute o comando de início com `--help` ver como para alterar a duração ou remover o `Bearer` do retorno.",
         "parameters": [
           {
             "in": "body",
             "name": "user",
             "schema": {
-              "$ref": "#/definitions/requestBodyUsuarios"
+              "$ref": "#/definitions/requestBodyLogin"
             }
           }
         ],
@@ -233,16 +240,16 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Cadastro com sucesso",
+          "200": {
+            "description": "Login realizado com sucesso",
             "schema": {
-              "$ref": "#/definitions/cadastroComSucesso"
+              "$ref": "#/definitions/loginComSucesso"
             }
           },
           "400": {
-            "description": "E-mail já cadastrado",
+            "description": "E-mail e/ou senha inválidos",
             "schema": {
-              "$ref": "#/definitions/errorEmailJaUtilizado"
+              "$ref": "#/definitions/errorEmailSenhaInvalidos"
             }
           }
         }
@@ -327,6 +334,17 @@
         }
       }
     },
+    "requestBodyLogin": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "$ref": "#/definitions/email"
+        },
+        "password": {
+          "$ref": "#/definitions/password"
+        }
+      }
+    },
     "getUsuarios": {
       "type": "object",
       "properties": {
@@ -392,6 +410,19 @@
         }
       }
     },
+    "loginComSucesso": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "Login realizado com sucesso"
+        },
+        "authorization": {
+          "type": "string",
+          "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZ1bGFub0BxYS5jb20iLCJwYXNzd29yZCI6InRlc3RlIiwiaWF0IjoxNTg5NzU4NzQ2LCJleHAiOjE1ODk3Njg3NDZ9.B6TASHV8k9xBerz4NSeFBlAZGSDhZlqESt767M0567I"
+        }
+      }
+    },
     "alteradoComSucesso": {
       "type": "object",
       "properties": {
@@ -407,6 +438,15 @@
         "message": {
           "type": "string",
           "example": "Este email já está sendo usado"
+        }
+      }
+    },
+    "errorEmailSenhaInvalidos": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "Email e/ou senha inválidos"
         }
       }
     },
