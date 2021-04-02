@@ -2,10 +2,22 @@
   "swagger": "2.0",
   "info": {
     "description": "O ServeRest é um servidor REST que simula uma loja virtual com intuito de servir de material de estudos de testes de API",
-    "version": "1.0.0",
-    "title": "ServeRest"
+    "version": "2.X.X",
+    "title": "ServeRest",
+    "contact": {
+      "name": "Suporte ServeRest",
+      "url": "https://github.com/ServeRest/ServeRest/issues",
+      "email": "contato@serverest.dev"
+    }
+  },
+  "externalDocs": {
+    "description": "Acesse o repositório do ServeRest para mais informações",
+    "url": "https://github.com/ServeRest/ServeRest"
   },
   "tags": [
+    {
+      "name": "Login"
+    },
     {
       "name": "Usuários",
       "description": "Gerencie os usuários, consulte dados para login e cadastre administrador"
@@ -22,7 +34,6 @@
           "Usuários"
         ],
         "summary": "Listar usuários cadastrados",
-        "operationId": "getEvents",
         "produces": [
           "application/json"
         ],
@@ -84,6 +95,75 @@
             }
           }
         }
+      }
+    },
+    "/usuarios/{_id}": {
+      "get": {
+        "tags": [
+          "Usuários"
+        ],
+        "summary": "Buscar usuário por ID",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "description": "ID do usuário",
+            "type": "string",
+            "default": "0uxuPY0cbmQhpEz1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de usuários",
+            "schema": {
+              "$ref": "#/definitions/getUsuariosId"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Usuários"
+        ],
+        "summary": "Excluir usuário",
+        "description": "Não é permitido excluir usuário com carrinho.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "description": "ID do usuário",
+            "type": "string",
+            "default": "0uxuPY0cbmQhpEz1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Registro excluído com sucesso | Nenhum registro excluído",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Registro excluído com sucesso | Nenhum registro excluído"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Usuário com carrinho cadastrado",
+            "schema": {
+              "$ref": "#/definitions/naoPermitidoExcluirUsuarioComCarrinho"
+            }
+          }
+        }
       },
       "put": {
         "tags": [
@@ -96,7 +176,7 @@
             "in": "path",
             "name": "_id",
             "required": true,
-            "description": "ID do usuário a ser alterado",
+            "description": "ID do usuário",
             "type": "string",
             "default": "0uxuPY0cbmQhpEz1"
           },
@@ -118,6 +198,41 @@
               "$ref": "#/definitions/alteradoComSucesso"
             }
           },
+          "201": {
+            "description": "Cadastro com sucesso",
+            "schema": {
+              "$ref": "#/definitions/cadastroComSucesso"
+            }
+          },
+          "400": {
+            "description": "E-mail já cadastrado",
+            "schema": {
+              "$ref": "#/definitions/errorEmailJaUtilizado"
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "Login"
+        ],
+        "summary": "Realizar login",
+        "description": "A duração padrão do token retornado em authorization é de 600 segundos (10 minutos). Caso esteja expirado irá receber status code 401 (Unauthorized).",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "user",
+            "schema": {
+              "$ref": "#/definitions/requestBodyUsuarios"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
           "201": {
             "description": "Cadastro com sucesso",
             "schema": {
@@ -244,6 +359,26 @@
         }
       }
     },
+    "getUsuariosId": {
+      "type": "object",
+      "properties": {
+        "nome": {
+          "$ref": "#/definitions/nome"
+        },
+        "email": {
+          "$ref": "#/definitions/email"
+        },
+        "password": {
+          "$ref": "#/definitions/password"
+        },
+        "administrador": {
+          "$ref": "#/definitions/administrador"
+        },
+        "_id": {
+          "$ref": "#/definitions/_id"
+        }
+      }
+    },
     "cadastroComSucesso": {
       "type": "object",
       "properties": {
@@ -274,10 +409,19 @@
           "example": "Este email já está sendo usado"
         }
       }
+    },
+    "naoPermitidoExcluirUsuarioComCarrinho": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "Não é permitido excluir usuário com carrinho cadastrado"
+        },
+        "idCarrinho": {
+          "type": "string",
+          "example": "qbMqntef4iTOwWfg"
+        }
+      }
     }
-  },
-  "externalDocs": {
-    "description": "Repositório do ServeRest",
-    "url": "https://github.com/PauloGoncalvesBH/ServeRest"
   }
 }
