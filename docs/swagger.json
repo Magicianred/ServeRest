@@ -21,6 +21,9 @@
     {
       "name": "Usuários",
       "description": "Gerencie os usuários, consulte dados para login e cadastre administrador"
+    },
+    {
+      "name": "Produtos"
     }
   ],
   "schemes": [
@@ -31,7 +34,8 @@
     "ApiKeyAuth": {
       "type": "apiKey",
       "in": "header",
-      "name": "Authorization"
+      "name": "Authorization",
+      "description": "Informe o `Authorization` retornado na rota _/login_"
     }
   },
   "paths": {
@@ -82,7 +86,8 @@
             "name": "user",
             "schema": {
               "$ref": "#/definitions/requestBodyUsuarios"
-            }
+            },
+            "required": true
           }
         ],
         "produces": [
@@ -192,7 +197,8 @@
             "name": "user",
             "schema": {
               "$ref": "#/definitions/requestBodyUsuarios"
-            }
+            },
+            "required": true
           }
         ],
         "produces": [
@@ -226,14 +232,15 @@
           "Login"
         ],
         "summary": "Realizar login",
-        "description": "A duração do token retornado em authorization é de 600 segundos (10 minutos). Caso esteja expirado irá receber status code 401 (Unauthorized). Caso esteja utilizando o _ServeRest_ via docker ou NPM execute o comando de início com `--help` ver como para alterar a duração ou remover o `Bearer` do retorno.",
+        "description": "A duração do token retornado em authorization é de 600 segundos (10 minutos). Caso esteja expirado irá receber status code 401 (Unauthorized). Se estiver utilizando o **ServeRest** via docker ou NPM execute o comando de início com `--help` para saber como alterar a duração ou remover o `Bearer` do retorno.",
         "parameters": [
           {
             "in": "body",
             "name": "user",
             "schema": {
               "$ref": "#/definitions/requestBodyLogin"
-            }
+            },
+            "required": true
           }
         ],
         "produces": [
@@ -250,6 +257,244 @@
             "description": "E-mail e/ou senha inválidos",
             "schema": {
               "$ref": "#/definitions/errorEmailSenhaInvalidos"
+            }
+          }
+        }
+      }
+    },
+    "/produtos": {
+      "get": {
+        "tags": [
+          "Produtos"
+        ],
+        "summary": "Listar produtos cadastrados",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/_id"
+          },
+          {
+            "$ref": "#/parameters/nome"
+          },
+          {
+            "$ref": "#/parameters/preco"
+          },
+          {
+            "$ref": "#/parameters/descricao"
+          },
+          {
+            "$ref": "#/parameters/quantidade"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de produtos",
+            "schema": {
+              "$ref": "#/definitions/getProdutos"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Produtos"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Cadastrar produto",
+        "description": "Não é permitido cadastrar produto com nome já utilizado",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "produto",
+            "schema": {
+              "$ref": "#/definitions/requestBodyProduto"
+            },
+            "required": true
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Cadastro com sucesso",
+            "schema": {
+              "$ref": "#/definitions/cadastroComSucesso"
+            }
+          },
+          "400": {
+            "description": "Já existe produto com esse nome",
+            "schema": {
+              "$ref": "#/definitions/existeProdutoComEsseNome"
+            }
+          },
+          "401": {
+            "description": "Token ausente, inválido ou expirado",
+            "schema": {
+              "$ref": "#/definitions/tokenAusenteInvalidoExpirado"
+            }
+          },
+          "403": {
+            "description": "Rota exclusiva para administradores (`administrador = true`)",
+            "schema": {
+              "$ref": "#/definitions/rotaParaAdministradores"
+            }
+          }
+        }
+      }
+    },
+    "/produtos/{_id}": {
+      "get": {
+        "tags": [
+          "Produtos"
+        ],
+        "summary": "Buscar produto por ID",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "description": "ID do produto",
+            "type": "string",
+            "default": "BeeJh5lz3k6kSIzA"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de produtos",
+            "schema": {
+              "$ref": "#/definitions/getProdutosId"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Produtos"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Excluir produto",
+        "description": "Não é permitido excluir produto que faz parte de carrinho.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "description": "ID do produto",
+            "type": "string",
+            "default": "0uxuPY0cbmQhpEz1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Registro excluído com sucesso | Nenhum registro excluído",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Registro excluído com sucesso | Nenhum registro excluído"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Produto faz parte de carrinho",
+            "schema": {
+              "$ref": "#/definitions/naoPermitidoExcluirProdutoDeCarrinho"
+            }
+          },
+          "401": {
+            "description": "Token ausente, inválido ou expirado",
+            "schema": {
+              "$ref": "#/definitions/tokenAusenteInvalidoExpirado"
+            }
+          },
+          "403": {
+            "description": "Rota exclusiva para administradores (`administrador = true`)",
+            "schema": {
+              "$ref": "#/definitions/rotaParaAdministradores"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Produtos"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Editar produto",
+        "description": "Não é permitido cadastrar produto com nome já utilizado. Caso não seja encontrado usuário com o ID informado é realizado novo cadastro ao invés de alteração.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "description": "ID do produto",
+            "type": "string",
+            "default": "0uxuPY0cbmQhpEz1"
+          },
+          {
+            "in": "body",
+            "name": "produto",
+            "schema": {
+              "$ref": "#/definitions/requestBodyProduto"
+            },
+            "required": true
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Alterado com sucesso",
+            "schema": {
+              "$ref": "#/definitions/alteradoComSucesso"
+            }
+          },
+          "201": {
+            "description": "Cadastro com sucesso",
+            "schema": {
+              "$ref": "#/definitions/cadastroComSucesso"
+            }
+          },
+          "400": {
+            "description": "Já existe produto com esse nome",
+            "schema": {
+              "$ref": "#/definitions/existeProdutoComEsseNome"
+            }
+          },
+          "401": {
+            "description": "Token ausente, inválido ou expirado",
+            "schema": {
+              "$ref": "#/definitions/tokenAusenteInvalidoExpirado"
+            }
+          },
+          "403": {
+            "description": "Rota exclusiva para administradores (`administrador = true`)",
+            "schema": {
+              "$ref": "#/definitions/rotaParaAdministradores"
             }
           }
         }
@@ -290,16 +535,40 @@
         "true",
         "false"
       ]
+    },
+    "preco": {
+      "in": "query",
+      "name": "preco",
+      "required": false,
+      "type": "integer",
+      "minimum": 1
+    },
+    "descricao": {
+      "in": "query",
+      "name": "descricao",
+      "required": false,
+      "type": "string"
+    },
+    "quantidade": {
+      "in": "query",
+      "name": "quantidade",
+      "required": false,
+      "type": "integer",
+      "minimum": 0
     }
   },
   "definitions": {
-    "nome": {
+    "nomeUsuario": {
       "type": "string",
       "example": "Fulano da Silva"
     },
-    "email": {
+    "emailBeltrano": {
       "type": "string",
       "example": "beltrano@qa.com.br"
+    },
+    "emailFulano": {
+      "type": "string",
+      "example": "fulano@qa.com"
     },
     "password": {
       "type": "string",
@@ -313,18 +582,58 @@
       ],
       "example": "true"
     },
-    "_id": {
+    "_idUsuario": {
       "type": "string",
       "example": "0uxuPY0cbmQhpEz1"
+    },
+    "nomeProduto1": {
+      "type": "string",
+      "example": "Logitech MX Vertical"
+    },
+    "precoProduto1": {
+      "type": "integer",
+      "example": 470
+    },
+    "descricaoProduto1": {
+      "type": "string",
+      "example": "Mouse"
+    },
+    "quantidadeProduto1": {
+      "type": "integer",
+      "example": 381
+    },
+    "_idProduto1": {
+      "type": "string",
+      "example": "BeeJh5lz3k6kSIzA"
+    },
+    "arrayProduto": {
+      "type": "object",
+      "properties": {
+        "nome": {
+          "type": "string"
+        },
+        "preco": {
+          "type": "integer"
+        },
+        "descricao": {
+          "type": "string"
+        },
+        "quantidade": {
+          "type": "integer"
+        },
+        "_id": {
+          "type": "string"
+        }
+      }
     },
     "requestBodyUsuarios": {
       "type": "object",
       "properties": {
         "nome": {
-          "$ref": "#/definitions/nome"
+          "$ref": "#/definitions/nomeUsuario"
         },
         "email": {
-          "$ref": "#/definitions/email"
+          "$ref": "#/definitions/emailBeltrano"
         },
         "password": {
           "$ref": "#/definitions/password"
@@ -338,10 +647,27 @@
       "type": "object",
       "properties": {
         "email": {
-          "$ref": "#/definitions/email"
+          "$ref": "#/definitions/emailFulano"
         },
         "password": {
           "$ref": "#/definitions/password"
+        }
+      }
+    },
+    "requestBodyProduto": {
+      "type": "object",
+      "properties": {
+        "nome": {
+          "$ref": "#/definitions/nomeProduto1"
+        },
+        "preco": {
+          "$ref": "#/definitions/precoProduto1"
+        },
+        "descricao": {
+          "$ref": "#/definitions/descricaoProduto1"
+        },
+        "quantidade": {
+          "$ref": "#/definitions/quantidadeProduto1"
         }
       }
     },
@@ -358,10 +684,10 @@
             "type": "object",
             "properties": {
               "nome": {
-                "$ref": "#/definitions/nome"
+                "$ref": "#/definitions/nomeUsuario"
               },
               "email": {
-                "$ref": "#/definitions/email"
+                "$ref": "#/definitions/emailBeltrano"
               },
               "password": {
                 "$ref": "#/definitions/password"
@@ -370,7 +696,7 @@
                 "$ref": "#/definitions/administrador"
               },
               "_id": {
-                "$ref": "#/definitions/_id"
+                "$ref": "#/definitions/_idUsuario"
               }
             }
           }
@@ -381,10 +707,10 @@
       "type": "object",
       "properties": {
         "nome": {
-          "$ref": "#/definitions/nome"
+          "$ref": "#/definitions/nomeUsuario"
         },
         "email": {
-          "$ref": "#/definitions/email"
+          "$ref": "#/definitions/emailBeltrano"
         },
         "password": {
           "$ref": "#/definitions/password"
@@ -393,7 +719,58 @@
           "$ref": "#/definitions/administrador"
         },
         "_id": {
-          "$ref": "#/definitions/_id"
+          "$ref": "#/definitions/_idUsuario"
+        }
+      }
+    },
+    "getProdutos": {
+      "type": "object",
+      "properties": {
+        "quantidade": {
+          "type": "number",
+          "example": 2
+        },
+        "usuarios": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/arrayProduto"
+          },
+          "example": [
+            {
+              "nome": "Logitech MX Vertical",
+              "preco": 470,
+              "descricao": "Mouse",
+              "quantidade": 381,
+              "_id": "BeeJh5lz3k6kSIzA"
+            },
+            {
+              "nome": "Samsung 60 polegadas",
+              "preco": 5240,
+              "descricao": "TV",
+              "quantidade": 49977,
+              "_id": "K6leHdftCeOJj8BJ"
+            }
+          ]
+        }
+      }
+    },
+    "getProdutosId": {
+      "type": "object",
+      "properties": {
+        "nome": {
+          "$ref": "#/definitions/nomeProduto1"
+        },
+        "preco": {
+          "$ref": "#/definitions/precoProduto1"
+        },
+        "descricao": {
+          "$ref": "#/definitions/descricaoProduto1"
+        },
+        "quantidade": {
+          "$ref": "#/definitions/quantidadeProduto1"
+        },
+        "_id": {
+          "$ref": "#/definitions/_idProduto1"
         }
       }
     },
@@ -460,6 +837,49 @@
         "idCarrinho": {
           "type": "string",
           "example": "qbMqntef4iTOwWfg"
+        }
+      }
+    },
+    "naoPermitidoExcluirProdutoDeCarrinho": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "Não é permitido excluir produto que faz parte de carrinho"
+        },
+        "idCarrinho": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "example": "qbMqntef4iTOwWfg, yILJY1eaAUC6hyRc"
+          }
+        }
+      }
+    },
+    "existeProdutoComEsseNome": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "Já existe produto com esse nome"
+        }
+      }
+    },
+    "tokenAusenteInvalidoExpirado": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "Token de acesso ausente, inválido, expirado ou usuário do token não existe mais"
+        }
+      }
+    },
+    "rotaParaAdministradores": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "Rota exclusiva para administradores"
         }
       }
     }
